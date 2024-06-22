@@ -1,0 +1,57 @@
+const express = require('express');
+// const oracledb = require('oracledb');
+const oracledb = require('oracledb');
+
+// Replace with your actual Oracle database credentials and connection details
+// const dbConfig = {
+//   user: 'sys as sysdba',
+//   password: '123',
+//   connectString: 'localhost:1522/xe'
+// };
+
+const dbConfig = {
+    user: 'sys',
+    password: '123',
+    connectString: 'localhost:1522/xe',
+    // privilege: oracledb.SYSDBA
+    privilege : oracledb.SYSDBA,
+  };
+const app = express();
+const port = process.env.PORT || 5050; // Use environment variable or default to 3000
+
+async function connectToDatabase() {
+  try {
+    const connection = await oracledb.getConnection(dbConfig);
+    console.log('Successfully connected to Oracle Database');
+
+    // Your database operations using the 'connection' object would go here
+ 
+    // Example query (replace with your actual query)
+    const result = await connection.execute(`SELECT * FROM sys.USERS`);
+    console.log(result.rows);
+
+  } catch (err) {
+    console.error('Error connecting to Oracle Database:', err);
+  } finally {
+    // Close the connection if it was established
+    if (connection) {
+      try {
+        await connection.close();
+        console.log('Database connection closed');
+      } catch (err) {
+        console.error('Error closing database connection:', err);
+      }
+    }
+  }
+}
+
+// Call the connection function on startup
+connectToDatabase();
+
+app.get('/', (req, res) => {
+  res.send('Hello from Node.js with Express (connected to Oracle DB)!');
+});
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
